@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <!-- Unité de persistance -->
+  <persistence-unit name="ENI_JPA_1PU" transaction-type="RESOURCE_LOCAL">
+    <!-- Implémentation utilisée -->
+    <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+    <!-- Entités -->
+    <class>fr.eni_jpa.model.entity.Personne</class>
+    <class>fr.eni_jpa.model.entity.Pays</class>
+    <class>fr.eni_jpa.model.entity.Ville</class>
+    <class>fr.eni_jpa.model.entity.Adresse</class>
+    <class>fr.eni_jpa.model.entity.Telephone</class>
+    <class>fr.eni_jpa.model.entity.PersonneAdresse</class>
+    <class>fr.eni_jpa.model.entity.PersonneDetail</class>
+    <class>fr.eni_jpa.model.entity.Langue</class>
+    <!-- Cache JPA -->
+    <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+    <!-- Paramètres de connexion à la base de données -->
+    <properties>
+      <!-- PostgreSQL Connection -
+      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/BD_ENI_JPA"/>
+      <property name="javax.persistence.jdbc.user" value="novAppli"/>
+      <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+      <property name="javax.persistence.jdbc.password" value="dbzgtaf0"/>-->
+      <!-- MySQL Connection -->
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/bdd_eni"/>
+      <property name="javax.persistence.jdbc.user" value="root"/>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.password" value="dbzgtaf0"/>
+      <!-- Affichage des requetes sql (pour le développement) -->
+      <property name="hibernate.show_sql" value="true"/>
+      <property name="hibernate.format_sql" value="true"/>
+      <!-- Cache de second niveau -->
+      <property name="hibernate.cache.use_second_level_cache" value="true"/>
+      <property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.ehcache.EhCacheRegionFactory"/>
+      <property name="hibernate.cache.default_cache_concurrency_strategy" value="read-only"/>
+      <property name="net.sf.ehcache.configurationResourceName" value="META-INF/ehcache.xml"/>
+      <!-- Pool de connexion -->
+      <property name="hibernate.c3p0.min_size" value="5"/>
+      <property name="hibernate.c3p0.max_size" value="20"/>
+      <property name="hibernate.c3p0.timeout" value="300"/>
+      <property name="hibernate.c3p0.max_statements" value="50"/>
+      <property name="hibernate.c3p0.idle_test_period" value="60"/>
+    </properties>
+  </persistence-unit>
+</persistence>
