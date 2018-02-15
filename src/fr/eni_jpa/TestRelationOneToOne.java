@@ -70,13 +70,13 @@ public class TestRelationOneToOne {
         } catch (Exception ex) {
             Logger.getLogger(TestRelationOneToOne.class.getName()).log(Level.SEVERE, null, ex);
         }
-        */
+        
         
         // C - Suppression en cascade pour une relation @OneToOne
         
         PersonneJpaController persJpa = new PersonneJpaController();
         // Récupère la personne Any
-        Personne pers = persJpa.findPersonneWithAll(13);
+        Personne pers = persJpa.findPersonneWithAll(12);
         // Suppression de l'entité Personne et de son entité fille PersonneDetail en cascade
         try {
             persJpa.destroy(pers.getId());
@@ -84,6 +84,15 @@ public class TestRelationOneToOne {
             Logger.getLogger(TestRelationOneToOne.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+        
+        // D - Suppression en cascade des entités filles orphelines 
+        PersonneJpaController persJpa = new PersonneJpaController();
+        // Récupère la personne
+        Personne pers = persJpa.findPersonneWithAll(11);
+        // Suppression de la liaison entre l'entité Personne et son entité fille PersonneDetail
+        // qui entraine en cascade la suppression de l'entité fille PersonneDetail devenue orpheline
+        pers.removePersonneDetail();
+        */
         
         /*
         // 3 – Création d’une entité : gérer les relations @ManyToMany - liste d’entités filles avec table de jointure

@@ -51,7 +51,7 @@ public class Personne implements Serializable {
     @Column(name = "prenom")
     private String prenom;
     
-    @OneToOne(mappedBy = "personne", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @OneToOne(mappedBy = "personne", cascade = CascadeType.ALL)
     private PersonneDetail personneDetail;
     
     @OneToMany(mappedBy = "idPersonne")
