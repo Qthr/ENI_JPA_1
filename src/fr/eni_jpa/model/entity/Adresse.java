@@ -7,8 +7,10 @@ package fr.eni_jpa.model.entity;
 
 import com.sun.istack.internal.Nullable;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -43,8 +45,8 @@ public class Adresse implements Serializable {
     @JoinColumn(name = "id_ville", referencedColumnName = "id")
     private Ville ville;
     
-    @OneToMany(mappedBy = "adresse")
-    private List<PersonneAdresse> listPersonneAdresse;
+    @OneToMany(mappedBy = "adresse", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PersonneAdresse> listPersonneAdresse = new ArrayList<>();
 
     
     
@@ -81,7 +83,21 @@ public class Adresse implements Serializable {
     }
     
    
-
+    public void addPersonneAdresse(PersonneAdresse persAdr){
+         this.getListPersonneAdresse().add(persAdr);
+         persAdr.setAdresse(this);
+     }
+     
+     public void removePersonneAdresse(PersonneAdresse persAdr){
+         persAdr.setAdresse(null);
+         this.getListPersonneAdresse().remove(persAdr);
+     }
+    
+    public void removePersonneAdresses(){
+        for(PersonneAdresse persAdr : new ArrayList<>(this.listPersonneAdresse)){
+            this.removePersonneAdresse(persAdr);
+        }
+    }
     
     
     @Override

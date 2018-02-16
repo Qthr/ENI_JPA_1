@@ -35,9 +35,6 @@ public class VilleJpaController implements Serializable {
     }
 
     public void create(Ville ville) {
-        if (ville.getAdresseList() == null) {
-            ville.setAdresseList(new ArrayList<Adresse>());
-        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -47,25 +44,10 @@ public class VilleJpaController implements Serializable {
                 pays = em.getReference(pays.getClass(), pays.getId());
                 ville.setPays(pays);
             }
-            List<Adresse> attachedAdresseList = new ArrayList<Adresse>();
-            for (Adresse adresseListAdresseToAttach : ville.getAdresseList()) {
-                adresseListAdresseToAttach = em.getReference(adresseListAdresseToAttach.getClass(), adresseListAdresseToAttach.getId());
-                attachedAdresseList.add(adresseListAdresseToAttach);
-            }
-            ville.setAdresseList(attachedAdresseList);
             em.persist(ville);
             if (pays != null) {
                 pays.getListVille().add(ville);
                 pays = em.merge(pays);
-            }
-            for (Adresse adresseListAdresse : ville.getAdresseList()) {
-                Ville oldVilleOfAdresseListAdresse = adresseListAdresse.getVille();
-                adresseListAdresse.setVille(ville);
-                adresseListAdresse = em.merge(adresseListAdresse);
-                if (oldVilleOfAdresseListAdresse != null) {
-                    oldVilleOfAdresseListAdresse.getAdresseList().remove(adresseListAdresse);
-                    oldVilleOfAdresseListAdresse = em.merge(oldVilleOfAdresseListAdresse);
-                }
             }
             em.getTransaction().commit();
         } finally {
@@ -83,19 +65,10 @@ public class VilleJpaController implements Serializable {
             Ville persistentVille = em.find(Ville.class, ville.getId());
             Pays paysOld = persistentVille.getPays();
             Pays paysNew = ville.getPays();
-            List<Adresse> adresseListOld = persistentVille.getAdresseList();
-            List<Adresse> adresseListNew = ville.getAdresseList();
             if (paysNew != null) {
                 paysNew = em.getReference(paysNew.getClass(), paysNew.getId());
                 ville.setPays(paysNew);
             }
-            List<Adresse> attachedAdresseListNew = new ArrayList<Adresse>();
-            for (Adresse adresseListNewAdresseToAttach : adresseListNew) {
-                adresseListNewAdresseToAttach = em.getReference(adresseListNewAdresseToAttach.getClass(), adresseListNewAdresseToAttach.getId());
-                attachedAdresseListNew.add(adresseListNewAdresseToAttach);
-            }
-            adresseListNew = attachedAdresseListNew;
-            ville.setAdresseList(adresseListNew);
             if (paysOld != null && !paysOld.equals(paysNew)) {
                 paysOld.getListVille().remove(ville);
                 paysOld = em.merge(paysOld);
@@ -103,27 +76,6 @@ public class VilleJpaController implements Serializable {
             if (paysNew != null && !paysNew.equals(paysOld)) {
                 paysNew.getListVille().add(ville);
                 paysNew = em.merge(paysNew);
-            }
-            System.out.println("Adresses new : toutes - trappes : "+adresseListNew);       
-            System.out.println("Adresse old : toutes :"+adresseListOld);
-
-            for (Adresse adresseListOldAdresse : adresseListOld) {
-                if (!adresseListNew.contains(adresseListOldAdresse)) {
-                    adresseListOldAdresse.setVille(null);
-                    System.out.println("NOM ADRESSE :"+adresseListOldAdresse.getLibelle()+"/ SA VILLE :"+adresseListOldAdresse.getVille());
-                    adresseListOldAdresse = em.merge(adresseListOldAdresse);
-                }
-            }
-            for (Adresse adresseListNewAdresse : adresseListNew) {
-                if (!adresseListOld.contains(adresseListNewAdresse)) {
-                    Ville oldVilleOfAdresseListNewAdresse = adresseListNewAdresse.getVille();
-                    adresseListNewAdresse.setVille(ville);
-                    adresseListNewAdresse = em.merge(adresseListNewAdresse);
-                    if (oldVilleOfAdresseListNewAdresse != null && !oldVilleOfAdresseListNewAdresse.equals(ville)) {
-                        oldVilleOfAdresseListNewAdresse.getAdresseList().remove(adresseListNewAdresse);
-                        oldVilleOfAdresseListNewAdresse = em.merge(oldVilleOfAdresseListNewAdresse);
-                    }
-                }
             }
             ville = em.merge(ville);   
             em.getTransaction().commit();
@@ -159,11 +111,6 @@ public class VilleJpaController implements Serializable {
             if (pays != null) {
                 pays.getListVille().remove(ville);
                 pays = em.merge(pays);
-            }
-            List<Adresse> adresseList = ville.getAdresseList();
-            for (Adresse adresseListAdresse : adresseList) {
-                adresseListAdresse.setVille(null);
-                adresseListAdresse = em.merge(adresseListAdresse);
             }
             em.remove(ville);
             em.getTransaction().commit();

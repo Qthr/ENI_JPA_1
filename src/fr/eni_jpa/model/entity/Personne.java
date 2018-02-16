@@ -52,14 +52,14 @@ public class Personne implements Serializable {
     @Column(name = "prenom")
     private String prenom;
     
-    @OneToOne(mappedBy = "personne", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "personne", cascade = CascadeType.ALL, orphanRemoval = true)
     private PersonneDetail personneDetail;
     
-    @OneToMany(mappedBy = "idPersonne", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "idPersonne", cascade = CascadeType.ALL)
     private List<Telephone> listTelephones = new ArrayList<>();
     
-    @OneToMany(mappedBy = "personne")
-    private List<PersonneAdresse> listPersonneAdresse;
+    @OneToMany(mappedBy = "personne", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PersonneAdresse> listPersonneAdresse = new ArrayList<>();
 
     
 
@@ -146,8 +146,22 @@ public class Personne implements Serializable {
             this.removeTelephone(tel);
         }
     }
+     
+     public void addPersonneAdresse(PersonneAdresse persAdr){
+         this.getListPersonneAdresse().add(persAdr);
+         persAdr.setPersonne(this);
+     }
+     
+     public void removePersonneAdresse(PersonneAdresse persAdr){
+         persAdr.setPersonne(null);
+         this.getListPersonneAdresse().remove(persAdr);
+     }
     
-    
+    public void removePersonneAdresses(){
+        for(PersonneAdresse persAdr : new ArrayList<>(this.listPersonneAdresse)){
+            this.removePersonneAdresse(persAdr);
+        }
+    }
     
     @Override
     public int hashCode() {

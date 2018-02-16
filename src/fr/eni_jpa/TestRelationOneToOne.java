@@ -36,7 +36,7 @@ public class TestRelationOneToOne {
     
     public static void main(String[] args) throws IllegalOrphanException{
         /*
-        // 1 - Cascade sur la relation OneToOne entre Personne et PersonneDetail
+        // 2 - Cascade sur la relation OneToOne entre Personne et PersonneDetail
         
         // A – Création en cascade pour une relation @OneToOne
         

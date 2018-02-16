@@ -37,7 +37,7 @@ public class TestRelationOneToMany {
     public static void main(String[] args) throws NonexistentEntityException{
        
       /*
-        // 2 - Cascade sur la relation OneToMany entre Personne et PersonneAdresse
+        // 3 - Cascade sur la relation OneToMany entre Personne et PersonneAdresse
        
         // A – Création en cascade pour une relation @OneToMany
         
@@ -65,7 +65,23 @@ public class TestRelationOneToMany {
         PersonneJpaController persJpa = new PersonneJpaController();
         TelephoneJpaController telJpa = new TelephoneJpaController();
         // Récupération d'une entité racine Personne
-        Personne pers = persJpa.findPersonneWithAll(16);
+        Personne pers = persJpa.fPersonneJpaController persJpa = new PersonneJpaController();
+        // Création d'une entité racine Personne
+        Personne pers = new Personne();
+        pers.setNom("Picaud");
+        pers.setPrenom("Robin");
+        pers.setDate_naissance(new Date (1993, 11, 8));
+        // Création de ses entités filles Telephone
+        Telephone tel1 = new Telephone();
+        tel1.setNumero("0139561174");
+        tel1.setLibelle("Maison");
+        Telephone tel2 = new Telephone();
+        tel2.setNumero("0684125695");
+        tel2.setLibelle("Portable");
+        pers.addTelephone(tel1);
+        pers.addTelephone(tel2);
+        // Création en base de l'entité Personne et de ses entités filles Telephone en cascade
+        persJpa.create(pers);indPersonneWithAll(16);
         // Modification de l'entité racine Personne
         pers.setPrenom("Chloé");
         pers.setDate_naissance(new Date (1991, 5, 3));

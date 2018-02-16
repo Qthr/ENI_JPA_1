@@ -36,9 +36,6 @@ public class AdresseJpaController implements Serializable {
     }
 
     public void create(Adresse adresse) {
-        if (adresse.getListPersonneAdresse() == null) {
-            adresse.setListPersonneAdresse(new ArrayList<PersonneAdresse>());
-        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -48,25 +45,10 @@ public class AdresseJpaController implements Serializable {
                 ville = em.getReference(ville.getClass(), ville.getId());
                 adresse.setVille(ville);
             }
-            List<PersonneAdresse> attachedListPersonneAdresse = new ArrayList<PersonneAdresse>();
-            for (PersonneAdresse listPersonneAdressePersonneAdresseToAttach : adresse.getListPersonneAdresse()) {
-                listPersonneAdressePersonneAdresseToAttach = em.getReference(listPersonneAdressePersonneAdresseToAttach.getClass(), listPersonneAdressePersonneAdresseToAttach.getPersonneAdressePK());
-                attachedListPersonneAdresse.add(listPersonneAdressePersonneAdresseToAttach);
-            }
-            adresse.setListPersonneAdresse(attachedListPersonneAdresse);
             em.persist(adresse);
             if (ville != null) {
                 ville.getAdresseList().add(adresse);
                 ville = em.merge(ville);
-            }
-            for (PersonneAdresse listPersonneAdressePersonneAdresse : adresse.getListPersonneAdresse()) {
-                Adresse oldAdresseOfListPersonneAdressePersonneAdresse = listPersonneAdressePersonneAdresse.getAdresse();
-                listPersonneAdressePersonneAdresse.setAdresse(adresse);
-                listPersonneAdressePersonneAdresse = em.merge(listPersonneAdressePersonneAdresse);
-                if (oldAdresseOfListPersonneAdressePersonneAdresse != null) {
-                    oldAdresseOfListPersonneAdressePersonneAdresse.getListPersonneAdresse().remove(listPersonneAdressePersonneAdresse);
-                    oldAdresseOfListPersonneAdressePersonneAdresse = em.merge(oldAdresseOfListPersonneAdressePersonneAdresse);
-                }
             }
             em.getTransaction().commit();
         } finally {
@@ -84,31 +66,10 @@ public class AdresseJpaController implements Serializable {
             Adresse persistentAdresse = em.find(Adresse.class, adresse.getId());
             Ville villeOld = persistentAdresse.getVille();
             Ville villeNew = adresse.getVille();
-            List<PersonneAdresse> listPersonneAdresseOld = persistentAdresse.getListPersonneAdresse();
-            List<PersonneAdresse> listPersonneAdresseNew = adresse.getListPersonneAdresse();
-            List<String> illegalOrphanMessages = null;
-            for (PersonneAdresse listPersonneAdresseOldPersonneAdresse : listPersonneAdresseOld) {
-                if (!listPersonneAdresseNew.contains(listPersonneAdresseOldPersonneAdresse)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain PersonneAdresse " + listPersonneAdresseOldPersonneAdresse + " since its adresse field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
             if (villeNew != null) {
                 villeNew = em.getReference(villeNew.getClass(), villeNew.getId());
                 adresse.setVille(villeNew);
             }
-            List<PersonneAdresse> attachedListPersonneAdresseNew = new ArrayList<PersonneAdresse>();
-            for (PersonneAdresse listPersonneAdresseNewPersonneAdresseToAttach : listPersonneAdresseNew) {
-                listPersonneAdresseNewPersonneAdresseToAttach = em.getReference(listPersonneAdresseNewPersonneAdresseToAttach.getClass(), listPersonneAdresseNewPersonneAdresseToAttach.getPersonneAdressePK());
-                attachedListPersonneAdresseNew.add(listPersonneAdresseNewPersonneAdresseToAttach);
-            }
-            listPersonneAdresseNew = attachedListPersonneAdresseNew;
-            adresse.setListPersonneAdresse(listPersonneAdresseNew);
             adresse = em.merge(adresse);
             if (villeOld != null && !villeOld.equals(villeNew)) {
                 villeOld.getAdresseList().remove(adresse);
@@ -117,17 +78,6 @@ public class AdresseJpaController implements Serializable {
             if (villeNew != null && !villeNew.equals(villeOld)) {
                 villeNew.getAdresseList().add(adresse);
                 villeNew = em.merge(villeNew);
-            }
-            for (PersonneAdresse listPersonneAdresseNewPersonneAdresse : listPersonneAdresseNew) {
-                if (!listPersonneAdresseOld.contains(listPersonneAdresseNewPersonneAdresse)) {
-                    Adresse oldAdresseOfListPersonneAdresseNewPersonneAdresse = listPersonneAdresseNewPersonneAdresse.getAdresse();
-                    listPersonneAdresseNewPersonneAdresse.setAdresse(adresse);
-                    listPersonneAdresseNewPersonneAdresse = em.merge(listPersonneAdresseNewPersonneAdresse);
-                    if (oldAdresseOfListPersonneAdresseNewPersonneAdresse != null && !oldAdresseOfListPersonneAdresseNewPersonneAdresse.equals(adresse)) {
-                        oldAdresseOfListPersonneAdresseNewPersonneAdresse.getListPersonneAdresse().remove(listPersonneAdresseNewPersonneAdresse);
-                        oldAdresseOfListPersonneAdresseNewPersonneAdresse = em.merge(oldAdresseOfListPersonneAdresseNewPersonneAdresse);
-                    }
-                }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -157,17 +107,6 @@ public class AdresseJpaController implements Serializable {
                 adresse.getId();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The adresse with id " + id + " no longer exists.", enfe);
-            }
-            List<String> illegalOrphanMessages = null;
-            List<PersonneAdresse> listPersonneAdresseOrphanCheck = adresse.getListPersonneAdresse();
-            for (PersonneAdresse listPersonneAdresseOrphanCheckPersonneAdresse : listPersonneAdresseOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This Adresse (" + adresse + ") cannot be destroyed since the PersonneAdresse " + listPersonneAdresseOrphanCheckPersonneAdresse + " in its listPersonneAdresse field has a non-nullable adresse field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             Ville ville = adresse.getVille();
             if (ville != null) {

@@ -36,9 +36,6 @@ public class PaysJpaController implements Serializable {
     }
 
     public void create(Pays pays) {
-        if (pays.getListVille() == null) {
-            pays.setListVille(new ArrayList<Ville>());
-        }
         if (pays.getListLangue() == null) {
             pays.setListLangue(new ArrayList<Langue>());
         }
@@ -46,12 +43,6 @@ public class PaysJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Ville> attachedListVille = new ArrayList<Ville>();
-            for (Ville listVilleVilleToAttach : pays.getListVille()) {
-                listVilleVilleToAttach = em.getReference(listVilleVilleToAttach.getClass(), listVilleVilleToAttach.getId());
-                attachedListVille.add(listVilleVilleToAttach);
-            }
-            pays.setListVille(attachedListVille);
             List<Langue> attachedListLangue = new ArrayList<Langue>();
             for (Langue listLangueLangueToAttach : pays.getListLangue()) {
                 listLangueLangueToAttach = em.getReference(listLangueLangueToAttach.getClass(), listLangueLangueToAttach.getId());
@@ -59,15 +50,6 @@ public class PaysJpaController implements Serializable {
             }
             pays.setListLangue(attachedListLangue);
             em.persist(pays);
-            for (Ville listVilleVille : pays.getListVille()) {
-                Pays oldPaysOfListVilleVille = listVilleVille.getPays();
-                listVilleVille.setPays(pays);
-                listVilleVille = em.merge(listVilleVille);
-                if (oldPaysOfListVilleVille != null) {
-                    oldPaysOfListVilleVille.getListVille().remove(listVilleVille);
-                    oldPaysOfListVilleVille = em.merge(oldPaysOfListVilleVille);
-                }
-            }
             for (Langue listLangueLangue : pays.getListLangue()) {
                 listLangueLangue.getListPays().add(pays);
                 listLangueLangue = em.merge(listLangueLangue);
@@ -86,29 +68,8 @@ public class PaysJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Pays persistentPays = em.find(Pays.class, pays.getId());
-            List<Ville> listVilleOld = persistentPays.getListVille();
-            List<Ville> listVilleNew = pays.getListVille();
             List<Langue> listLangueOld = persistentPays.getListLangue();
             List<Langue> listLangueNew = pays.getListLangue();
-            List<String> illegalOrphanMessages = null;
-            for (Ville listVilleOldVille : listVilleOld) {
-                if (!listVilleNew.contains(listVilleOldVille)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain Ville " + listVilleOldVille + " since its pays field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
-            List<Ville> attachedListVilleNew = new ArrayList<Ville>();
-            for (Ville listVilleNewVilleToAttach : listVilleNew) {
-                listVilleNewVilleToAttach = em.getReference(listVilleNewVilleToAttach.getClass(), listVilleNewVilleToAttach.getId());
-                attachedListVilleNew.add(listVilleNewVilleToAttach);
-            }
-            listVilleNew = attachedListVilleNew;
-            pays.setListVille(listVilleNew);
             List<Langue> attachedListLangueNew = new ArrayList<Langue>();
             for (Langue listLangueNewLangueToAttach : listLangueNew) {
                 listLangueNewLangueToAttach = em.getReference(listLangueNewLangueToAttach.getClass(), listLangueNewLangueToAttach.getId());
@@ -116,17 +77,6 @@ public class PaysJpaController implements Serializable {
             }
             listLangueNew = attachedListLangueNew;
             pays.setListLangue(listLangueNew);
-            for (Ville listVilleNewVille : listVilleNew) {
-                if (!listVilleOld.contains(listVilleNewVille)) {
-                    Pays oldPaysOfListVilleNewVille = listVilleNewVille.getPays();
-                    listVilleNewVille.setPays(pays);
-                    listVilleNewVille = em.merge(listVilleNewVille);
-                    if (oldPaysOfListVilleNewVille != null && !oldPaysOfListVilleNewVille.equals(pays)) {
-                        oldPaysOfListVilleNewVille.getListVille().remove(listVilleNewVille);
-                        oldPaysOfListVilleNewVille = em.merge(oldPaysOfListVilleNewVille);
-                    }
-                }
-            }
             for (Langue listLangueOldLangue : listLangueOld) {
                 if (!listLangueNew.contains(listLangueOldLangue)) {
                     listLangueOldLangue.getListPays().remove(pays);
@@ -168,17 +118,6 @@ public class PaysJpaController implements Serializable {
                 pays.getId();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The pays with id " + id + " no longer exists.", enfe);
-            }
-            List<String> illegalOrphanMessages = null;
-            List<Ville> listVilleOrphanCheck = pays.getListVille();
-            for (Ville listVilleOrphanCheckVille : listVilleOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This Pays (" + pays + ") cannot be destroyed since the Ville " + listVilleOrphanCheckVille + " in its listVille field has a non-nullable pays field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             List<Langue> listLangue = pays.getListLangue();
             for (Langue listLangueLangue : listLangue) {

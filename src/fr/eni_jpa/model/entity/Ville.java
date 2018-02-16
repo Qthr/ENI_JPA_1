@@ -6,8 +6,10 @@
 package fr.eni_jpa.model.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -50,8 +52,8 @@ public class Ville implements Serializable {
     @JoinColumn(name = "pays", referencedColumnName = "id")
     private Pays pays;
     
-    @OneToMany(mappedBy = "ville")
-    private List<Adresse> adresseList;
+    @OneToMany(mappedBy = "ville", cascade = CascadeType.ALL)
+    private List<Adresse> adresseList = new ArrayList<>();
             
     public Integer getId() {
         return id;
@@ -101,6 +103,21 @@ public class Ville implements Serializable {
         this.adresseList = adresseList;
     }
     
+    public void addAdresse(Adresse adr){
+         this.getAdresseList().add(adr);
+         adr.setVille(this);
+     }
+     
+     public void removeAdresse(Adresse adr){
+         adr.setVille(null);
+         this.getAdresseList().remove(adr);
+     }
+    
+    public void removePersonneAdresses(){
+        for(Adresse adr : new ArrayList<>(this.adresseList)){
+            this.removeAdresse(adr);
+        }
+    }
     
     
 
