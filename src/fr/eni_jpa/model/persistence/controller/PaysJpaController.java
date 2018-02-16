@@ -35,25 +35,12 @@ public class PaysJpaController implements Serializable {
         return PersistenceFactory.getEmf().createEntityManager();
     }
 
-    public void create(Pays pays) {
-        if (pays.getListLangue() == null) {
-            pays.setListLangue(new ArrayList<Langue>());
-        }
+      public void create(Pays pays) {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Langue> attachedListLangue = new ArrayList<Langue>();
-            for (Langue listLangueLangueToAttach : pays.getListLangue()) {
-                listLangueLangueToAttach = em.getReference(listLangueLangueToAttach.getClass(), listLangueLangueToAttach.getId());
-                attachedListLangue.add(listLangueLangueToAttach);
-            }
-            pays.setListLangue(attachedListLangue);
             em.persist(pays);
-            for (Langue listLangueLangue : pays.getListLangue()) {
-                listLangueLangue.getListPays().add(pays);
-                listLangueLangue = em.merge(listLangueLangue);
-            }
             em.getTransaction().commit();
         } finally {
             if (em != null) {
@@ -62,33 +49,11 @@ public class PaysJpaController implements Serializable {
         }
     }
 
-    public void edit(Pays pays) throws IllegalOrphanException, NonexistentEntityException, Exception {
+     public void edit(Pays pays) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Pays persistentPays = em.find(Pays.class, pays.getId());
-            List<Langue> listLangueOld = persistentPays.getListLangue();
-            List<Langue> listLangueNew = pays.getListLangue();
-            List<Langue> attachedListLangueNew = new ArrayList<Langue>();
-            for (Langue listLangueNewLangueToAttach : listLangueNew) {
-                listLangueNewLangueToAttach = em.getReference(listLangueNewLangueToAttach.getClass(), listLangueNewLangueToAttach.getId());
-                attachedListLangueNew.add(listLangueNewLangueToAttach);
-            }
-            listLangueNew = attachedListLangueNew;
-            pays.setListLangue(listLangueNew);
-            for (Langue listLangueOldLangue : listLangueOld) {
-                if (!listLangueNew.contains(listLangueOldLangue)) {
-                    listLangueOldLangue.getListPays().remove(pays);
-                    listLangueOldLangue = em.merge(listLangueOldLangue);
-                }
-            }
-            for (Langue listLangueNewLangue : listLangueNew) {
-                if (!listLangueOld.contains(listLangueNewLangue)) {
-                    listLangueNewLangue.getListPays().add(pays);
-                    listLangueNewLangue = em.merge(listLangueNewLangue);
-                }
-            }
             pays = em.merge(pays);
             em.getTransaction().commit();
         } catch (Exception ex) {

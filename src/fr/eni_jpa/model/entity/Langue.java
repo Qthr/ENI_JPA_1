@@ -6,6 +6,7 @@
 package fr.eni_jpa.model.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -44,7 +45,7 @@ public class Langue implements Serializable {
             joinColumns = {@JoinColumn(name = "id_langue", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "id_pays", referencedColumnName = "id")}
     )
-    private List<Pays> listPays;
+    private List<Pays> listPays = new ArrayList<>();
 
     
     public Integer getId() {

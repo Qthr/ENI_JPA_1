@@ -57,8 +57,8 @@ public class Pays implements Serializable {
     @OneToMany(mappedBy = "pays", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ville> listVille = new ArrayList<>();
     
-    @ManyToMany(mappedBy = "listPays")
-    private List<Langue> listLangue;
+    @ManyToMany(mappedBy = "listPays", cascade = { CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Langue> listLangue = new ArrayList<>();
     
     
 
@@ -131,6 +131,22 @@ public class Pays implements Serializable {
     public void removeVilles(){
          for(Ville ville : new ArrayList<>(this.listVille)) {
             this.removeVille(ville);
+        }
+    }
+    
+     public void addLangue(Langue langue) {
+         this.getListLangue().add(langue);
+         langue.getListPays().add(this);
+    }
+ 
+    public void removeLangue(Langue langue) {
+        this.getListLangue().remove(langue);
+        langue.getListPays().remove(this);
+    }
+    
+    public void removeLangues(){
+         for(Langue langue : new ArrayList<>(this.listLangue)) {
+            this.removeLangue(langue);
         }
     }
 
