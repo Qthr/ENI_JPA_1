@@ -38,9 +38,6 @@ public class PersonneJpaController implements Serializable {
     }
 
     public void create(Personne personne) {
-        if (personne.getListTelephones() == null) {
-            personne.setListTelephones(new ArrayList<Telephone>());
-        }
         if (personne.getListPersonneAdresse() == null) {
             personne.setListPersonneAdresse(new ArrayList<PersonneAdresse>());
         }
@@ -48,12 +45,6 @@ public class PersonneJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Telephone> attachedListTelephones = new ArrayList<Telephone>();
-            for (Telephone listTelephonesTelephoneToAttach : personne.getListTelephones()) {
-                listTelephonesTelephoneToAttach = em.getReference(listTelephonesTelephoneToAttach.getClass(), listTelephonesTelephoneToAttach.getId());
-                attachedListTelephones.add(listTelephonesTelephoneToAttach);
-            }
-            personne.setListTelephones(attachedListTelephones);
             List<PersonneAdresse> attachedListPersonneAdresse = new ArrayList<PersonneAdresse>();
             for (PersonneAdresse listPersonneAdressePersonneAdresseToAttach : personne.getListPersonneAdresse()) {
                 listPersonneAdressePersonneAdresseToAttach = em.getReference(listPersonneAdressePersonneAdresseToAttach.getClass(), listPersonneAdressePersonneAdresseToAttach.getPersonneAdressePK());
@@ -61,15 +52,6 @@ public class PersonneJpaController implements Serializable {
             }
             personne.setListPersonneAdresse(attachedListPersonneAdresse);
             em.persist(personne);
-            for (Telephone listTelephonesTelephone : personne.getListTelephones()) {
-                Personne oldIdPersonneOfListTelephonesTelephone = listTelephonesTelephone.getIdPersonne();
-                listTelephonesTelephone.setIdPersonne(personne);
-                listTelephonesTelephone = em.merge(listTelephonesTelephone);
-                if (oldIdPersonneOfListTelephonesTelephone != null) {
-                    oldIdPersonneOfListTelephonesTelephone.getListTelephones().remove(listTelephonesTelephone);
-                    oldIdPersonneOfListTelephonesTelephone = em.merge(oldIdPersonneOfListTelephonesTelephone);
-                }
-            }
             for (PersonneAdresse listPersonneAdressePersonneAdresse : personne.getListPersonneAdresse()) {
                 Personne oldPersonneOfListPersonneAdressePersonneAdresse = listPersonneAdressePersonneAdresse.getPersonne();
                 listPersonneAdressePersonneAdresse.setPersonne(personne);
@@ -93,8 +75,6 @@ public class PersonneJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Personne persistentPersonne = em.find(Personne.class, personne.getId());
-            List<Telephone> telephoneListOld = persistentPersonne.getListTelephones();
-            List<Telephone> telephoneListNew = personne.getListTelephones();
             List<PersonneAdresse> personneAdresseListOld = persistentPersonne.getListPersonneAdresse();
             List<PersonneAdresse> personneAdresseListNew = personne.getListPersonneAdresse();
             List<String> illegalOrphanMessages = null;
@@ -109,13 +89,6 @@ public class PersonneJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Telephone> attachedTelephoneListNew = new ArrayList<Telephone>();
-            for (Telephone telephoneListNewTelephoneToAttach : telephoneListNew) {
-                telephoneListNewTelephoneToAttach = em.getReference(telephoneListNewTelephoneToAttach.getClass(), telephoneListNewTelephoneToAttach.getId());
-                attachedTelephoneListNew.add(telephoneListNewTelephoneToAttach);
-            }
-            telephoneListNew = attachedTelephoneListNew;
-            personne.setListTelephones(telephoneListNew);
             List<PersonneAdresse> attachedPersonneAdresseListNew = new ArrayList<PersonneAdresse>();
             for (PersonneAdresse personneAdresseListNewPersonneAdresseToAttach : personneAdresseListNew) {
                 personneAdresseListNewPersonneAdresseToAttach = em.getReference(personneAdresseListNewPersonneAdresseToAttach.getClass(), personneAdresseListNewPersonneAdresseToAttach.getPersonneAdressePK());
@@ -123,23 +96,6 @@ public class PersonneJpaController implements Serializable {
             }
             personneAdresseListNew = attachedPersonneAdresseListNew;
             personne.setListPersonneAdresse(personneAdresseListNew);
-            for (Telephone telephoneListOldTelephone : telephoneListOld) {
-                if (!telephoneListNew.contains(telephoneListOldTelephone)) {
-                    telephoneListOldTelephone.setIdPersonne(null);
-                    telephoneListOldTelephone = em.merge(telephoneListOldTelephone);
-                }
-            }
-            for (Telephone telephoneListNewTelephone : telephoneListNew) {
-                if (!telephoneListOld.contains(telephoneListNewTelephone)) {
-                    Personne oldIdPersonneOfTelephoneListNewTelephone = telephoneListNewTelephone.getIdPersonne();
-                    telephoneListNewTelephone.setIdPersonne(personne);
-                    telephoneListNewTelephone = em.merge(telephoneListNewTelephone);
-                    if (oldIdPersonneOfTelephoneListNewTelephone != null && !oldIdPersonneOfTelephoneListNewTelephone.equals(personne)) {
-                        oldIdPersonneOfTelephoneListNewTelephone.getListTelephones().remove(telephoneListNewTelephone);
-                        oldIdPersonneOfTelephoneListNewTelephone = em.merge(oldIdPersonneOfTelephoneListNewTelephone);
-                    }
-                }
-            }
             for (PersonneAdresse personneAdresseListNewPersonneAdresse : personneAdresseListNew) {
                 if (!personneAdresseListOld.contains(personneAdresseListNewPersonneAdresse)) {
                     Personne oldPersonneOfPersonneAdresseListNewPersonneAdresse = personneAdresseListNewPersonneAdresse.getPersonne();

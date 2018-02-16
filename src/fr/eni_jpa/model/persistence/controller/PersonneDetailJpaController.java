@@ -52,8 +52,8 @@ public class PersonneDetailJpaController implements Serializable {
             }
         }
     }
-/*
-    public void edit(PersonneDetail personneDetail) throws fr.eni_jpa.exceptions.IllegalOrphanException, fr.eni_jpa.exceptions.NonexistentEntityException, Exception {
+
+    public void edit(PersonneDetail personneDetail) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -72,7 +72,7 @@ public class PersonneDetailJpaController implements Serializable {
                 }
             }
             if (illegalOrphanMessages != null) {
-                throw new fr.eni_jpa.exceptions.IllegalOrphanException(illegalOrphanMessages);
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             if (personneNew != null) {
                 personneNew = em.getReference(personneNew.getClass(), personneNew.getId());
@@ -93,7 +93,7 @@ public class PersonneDetailJpaController implements Serializable {
             if (msg == null || msg.length() == 0) {
                 Integer id = personneDetail.getIdPersonne();
                 if (findPersonneDetail(id) == null) {
-                    throw new fr.eni_jpa.exceptions.NonexistentEntityException("The personneDetail with id " + id + " no longer exists.");
+                    throw new NonexistentEntityException("The personneDetail with id " + id + " no longer exists.");
                 }
             }
             throw ex;
@@ -125,7 +125,7 @@ public class PersonneDetailJpaController implements Serializable {
             }
         }
     }
-*/
+
     public List<PersonneDetail> findPersonneDetailEntities() {
         return findPersonneDetailEntities(true, -1, -1);
     }

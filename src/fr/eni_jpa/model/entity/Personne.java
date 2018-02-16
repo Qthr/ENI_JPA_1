@@ -6,6 +6,7 @@
 package fr.eni_jpa.model.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
@@ -54,8 +55,8 @@ public class Personne implements Serializable {
     @OneToOne(mappedBy = "personne", cascade = CascadeType.ALL)
     private PersonneDetail personneDetail;
     
-    @OneToMany(mappedBy = "idPersonne")
-    private List<Telephone> listTelephones;
+    @OneToMany(mappedBy = "idPersonne", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Telephone> listTelephones = new ArrayList<>();
     
     @OneToMany(mappedBy = "personne")
     private List<PersonneAdresse> listPersonneAdresse;
@@ -98,12 +99,16 @@ public class Personne implements Serializable {
         return personneDetail;
     }
 
-    public List<Telephone> getListTelephones() {
-        return listTelephones;
+    public void setPersonneDetail(PersonneDetail personneDetail) {
+        this.personneDetail = personneDetail;
     }
 
     public void setListTelephones(List<Telephone> listTelephones) {
         this.listTelephones = listTelephones;
+    }
+
+    public List<Telephone> getListTelephones() {
+        return listTelephones;
     }
 
     public List<PersonneAdresse> getListPersonneAdresse() {
@@ -124,6 +129,22 @@ public class Personne implements Serializable {
             this.personneDetail.setPersonne(null);
         }
         this.personneDetail = null;
+    }
+    
+    public void addTelephone(Telephone tel) {
+         this.getListTelephones().add(tel);
+         tel.setIdPersonne(this);
+    }
+ 
+    public void removeTelephone(Telephone tel) {
+        tel.setIdPersonne(null);
+        this.getListTelephones().remove(tel);
+    }
+    
+     public void removeTelephones(){
+         for(Telephone tel : new ArrayList<>(this.listTelephones)) {
+            this.removeTelephone(tel);
+        }
     }
     
     
