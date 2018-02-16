@@ -97,9 +97,45 @@ public class TestRelationOneToMany {
             Logger.getLogger(TestRelationOneToMany.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        // C - Suppression en cascade des entités filles orphelines pour une relation @OneToMany
+        
+        PersonneJpaController persJpa = new PersonneJpaController();
+        TelephoneJpaController telJpa = new TelephoneJpaController();
+        // Récupération d'une entité racine Personne
+        Personne pers = persJpa.findPersonneWithAll(16);
+        // Modification de l'entité racine Personne
+        pers.setPrenom("Chloé");
+        pers.setDate_naissance(new Date (1991, 5, 3));
+        // Modification de ses entités filles Telephone
+        Telephone tel1 = pers.getListTelephones().get(0);
+        Telephone tel2 = pers.getListTelephones().get(1);
+        Telephone tel3 = new Telephone();
+        tel3.setLibelle("Maison Campagne");
+        tel3.setNumero("0265896561");
+        // On modifie le numéro de tel1 possédé par Personne
+        tel1.setNumero("0315832156");
+        // On supprime tel2 de la liste des telephones possédés par Personne
+        // La suppression de cette relation va entrainer la suppression de tel2 en base lors du edit()
+        // car orphanRemoval=true sur la relation @OneToMany de Personne vers Telephone
+        pers.removeTelephone(tel2);
+        // On ajoute tel3 à la liste des téléphones possédés par Personne
+        pers.addTelephone(tel3);
+        // Modification en base de l'entité Personne et de ses entités filles Telephone en cascade
+        try {
+            persJpa.edit(pers);     // -> tel2 est supprimée de la base 
+        } catch (NonexistentEntityException ex) {
+            Logger.getLogger(TestRelationOneToMany.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(TestRelationOneToMany.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        
+        
+        
         
       /*
-        // C - Suppression en cascade pour une relation @OneToMany
+        // D - Suppression en cascade pour une relation @OneToMany
         
         PersonneJpaController persJpa = new PersonneJpaController();
         // Récupération d'une entité racine Personne
@@ -114,19 +150,6 @@ public class TestRelationOneToMany {
         }
         
       
-        // D - Suppression en cascade des entités filles orphelines pour une relation @OneToMany
-        
-        PersonneJpaController persJpa = new PersonneJpaController();
-        // Récupère une entité Personne
-        Personne pers = persJpa.findPersonneWithAll(16);
-        // Supprime les relations entre Personne et toutes ses entités filles Telephone
-        // Cette opération entraine la suppression des entités Telephone orphelines en base (car orphanRemoval = true) 
-        pers.removeTelephones();
-        try {
-            persJpa.edit(pers);
-        } catch (Exception ex) {
-            Logger.getLogger(TestRelationOneToMany.class.getName()).log(Level.SEVERE, null, ex);
-        }
         
         */
         

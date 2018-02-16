@@ -75,9 +75,17 @@ public class PersonneJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Personne persistentPersonne = em.find(Personne.class, personne.getId());
+            PersonneDetail personneDetailOld = persistentPersonne.getPersonneDetail();
+            PersonneDetail personneDetailNew = personne.getPersonneDetail();
             List<PersonneAdresse> personneAdresseListOld = persistentPersonne.getListPersonneAdresse();
             List<PersonneAdresse> personneAdresseListNew = personne.getListPersonneAdresse();
             List<String> illegalOrphanMessages = null;
+            if (personneDetailOld != null && !personneDetailOld.equals(personneDetailNew)) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("You must retain PersonneDetail " + personneDetailOld + " since its personne field is not nullable.");
+            }
             for (PersonneAdresse personneAdresseListOldPersonneAdresse : personneAdresseListOld) {
                 if (!personneAdresseListNew.contains(personneAdresseListOldPersonneAdresse)) {
                     if (illegalOrphanMessages == null) {
@@ -89,6 +97,11 @@ public class PersonneJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
+            // ############## A SUPPRIMER : Commentaires ######################
+            //if (personneDetailNew != null) {
+            //    personneDetailNew = em.getReference(personneDetailNew.getClass(), personneDetailNew.getIdPersonne());
+            //    personne.setPersonneDetail(personneDetailNew);
+            //}
             List<PersonneAdresse> attachedPersonneAdresseListNew = new ArrayList<PersonneAdresse>();
             for (PersonneAdresse personneAdresseListNewPersonneAdresseToAttach : personneAdresseListNew) {
                 personneAdresseListNewPersonneAdresseToAttach = em.getReference(personneAdresseListNewPersonneAdresseToAttach.getClass(), personneAdresseListNewPersonneAdresseToAttach.getPersonneAdressePK());
@@ -96,6 +109,15 @@ public class PersonneJpaController implements Serializable {
             }
             personneAdresseListNew = attachedPersonneAdresseListNew;
             personne.setListPersonneAdresse(personneAdresseListNew);
+            //if (personneDetailNew != null && !personneDetailNew.equals(personneDetailOld)) {
+            //    Personne oldPersonneOfPersonneDetail = personneDetailNew.getPersonne();
+            //    if (oldPersonneOfPersonneDetail != null) {
+            //        oldPersonneOfPersonneDetail.setPersonneDetail(null);
+            //        oldPersonneOfPersonneDetail = em.merge(oldPersonneOfPersonneDetail);
+            //    }
+            //    personneDetailNew.setPersonne(personne);
+            //    personneDetailNew = em.merge(personneDetailNew);
+            //}
             for (PersonneAdresse personneAdresseListNewPersonneAdresse : personneAdresseListNew) {
                 if (!personneAdresseListOld.contains(personneAdresseListNewPersonneAdresse)) {
                     Personne oldPersonneOfPersonneAdresseListNewPersonneAdresse = personneAdresseListNewPersonneAdresse.getPersonne();

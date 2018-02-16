@@ -35,11 +35,37 @@ import java.util.logging.Logger;
  *
  * @author Quentin Therre <quentin.therre@novarea-tec.com>
  */
-public class TestModification {
+public class TestRelationOptionalFalse {
         
     public static void main(String[] args){
         
-   
+       // 1  – Exemple : la relation @OneToOne/@OneToOne(optional=false) entre Personne et PersonneDetail
+
+       // A - Modification
+        
+        // a - 1ere solution 
+        PersonneJpaController persJpa = new PersonneJpaController();
+        PersonneDetailJpaController persDetJpa = new PersonneDetailJpaController();
+        // Récupère une entité Personne
+        Personne pers = persJpa.findPersonneWithAll(11);
+        PersonneDetail persDet = pers.getPersonneDetail();
+        // On supprime la relation de Personne vers PersonneDetail
+        pers.removePersonneDetail();
+        // On est obligé de modifier l'entité fille manuellement car la cascade sur
+        // l'entité Personne ne se propage que sur l'entité fille qu'elle possède.
+        try {
+            persDetJpa.edit(persDet);
+        } catch (Exception ex) {
+            Logger.getLogger(TestRelationOneToMany.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        // Modification de l'entité Personne
+        try {
+            persJpa.edit(pers);
+        } catch (NonexistentEntityException ex) {
+            Logger.getLogger(TestRelationOneToOne.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(TestRelationOneToOne.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
         
         PersistenceFactory.close();

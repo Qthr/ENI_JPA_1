@@ -96,7 +96,23 @@ public class TestRelationOneToOne {
             Logger.getLogger(TestRelationOneToOne.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        // C - Suppression en cascade pour une relation @OneToOne
+        
+        // C - Suppression en cascade des entités filles orphelines pour une relation @OneToOne
+         PersonneJpaController persJpa = new PersonneJpaController();
+        // Récupère la personne
+        Personne pers = persJpa.findPersonneWithAll(11);
+        //On supprime la laisons entre l'entité racine Personne et son entité fille PersonneDetail
+        // La suppression de cette relation va entrainer la suppression de l'entité fille PersonneDetail en base lors du edit()
+        // car orphanRemoval=true sur la relation @OneToOne de Personne vers PersonneDetail
+        pers.removePersonneDetail();
+         try {
+            persJpa.edit(pers);
+        } catch (Exception ex) {
+            Logger.getLogger(TestRelationOneToMany.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        // D - Suppression en cascade pour une relation @OneToOne
         
         PersonneJpaController persJpa = new PersonneJpaController();
         // Récupère la personne Any
@@ -109,18 +125,7 @@ public class TestRelationOneToOne {
         }
         
         
-        // D - Suppression en cascade des entités filles orphelines pour une relation @OneToOne
-         PersonneJpaController persJpa = new PersonneJpaController();
-        // Récupère la personne
-        Personne pers = persJpa.findPersonneWithAll(11);
-        // Suppression de la liaison entre l'entité Personne et son entité fille PersonneDetail
-        // qui entraine en cascade la suppression de l'entité fille PersonneDetail devenue orpheline
-        pers.removePersonneDetail();
-         try {
-            persJpa.edit(pers);
-        } catch (Exception ex) {
-            Logger.getLogger(TestRelationOneToMany.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
         
         
        
